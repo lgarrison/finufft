@@ -81,6 +81,10 @@ For example, to configure, build and test the development preset (which builds t
 From other CMake projects, to use ``finufft`` as a library, simply add this repository as a subdirectory using
 ``add_subdirectory``, and use ``target_link_library(your_executable finufft)``.
 
+.. note::
+
+   CMake compiling on linux at Flatiron Institute (Rusty cluster). We have had a report that if you want to use LLVM, you need to ``module load llvm/16.0.3`` otherwise the default ``llvm/14.0.6`` does not find ``OpenMP_CXX``.
+
 
 Old GNU make based route
 ------------------------
@@ -259,8 +263,6 @@ Compilation flags and make.inc settings
 This is for experts.
 Here are all the flags that the FINUFFT source responds to.
 Activate them by adding a line of the form ``CXXFLAGS+=-DMYFLAG`` in your ``make.inc``:
-
-* ``-DFFTW_PLAN_SAFE``: This makes FINUFFT call ``fftw_make_planner_thread_safe()`` as part of its FFTW3 planner stage; see http://www.fftw.org/fftw3_doc/Thread-safety.html. This makes FINUFFT thread-safe. See ``examples/threadsafe1d1.cpp`` and ``examples/threadsafe2d2f.cpp``. This is only available in FFTW version >=3.3.6; for this reason it is not yet the default. If you get segfault on these examples, try ``FFTWOMPSUFFIX = threads`` as explained below.
 
 * ``-DSINGLE``: This is internally used by our build process to switch
   (via preprocessor macros) the source from double to single precision.
