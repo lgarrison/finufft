@@ -309,5 +309,7 @@ template int cufinufft_spread1d<float>(int nf1, cuda_complex<float> *d_fw, int M
                                        cufinufft_plan_t<float> *d_plan);
 template int cufinufft_spread1d<double>(int nf1, cuda_complex<double> *d_fw, int M, double *d_kx,
                                         cuda_complex<double> *d_c, cufinufft_plan_t<double> *d_plan);
+template int cuspread1d<float>(cufinufft_plan_t<float> *d_plan, int blksize);
+template int cuspread1d<double>(cufinufft_plan_t<double> *d_plan, int blksize);
 } // namespace spreadinterp
 } // namespace cufinufft
