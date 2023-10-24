@@ -172,6 +172,7 @@ int cufinufft_makeplan_impl(int type, int dim, int *nmodes, int iflag, int ntran
     if (d_plan->type == 2)
         d_plan->spopts.spread_direction = 2;
 
+    cufftSetStream(d_plan->fftplan, d_plan->stream);
     switch (d_plan->dim) {
     case 1: {
         int n[] = {(int)nf1};
@@ -195,7 +196,6 @@ int cufinufft_makeplan_impl(int type, int dim, int *nmodes, int iflag, int ntran
                       inembed[0] * inembed[1] * inembed[2], cufft_type<T>(), maxbatchsize);
     } break;
     }
-    cufftSetStream(d_plan->fftplan, d_plan->stream);
 
     using namespace cufinufft::memtransfer;
     switch (d_plan->dim) {
