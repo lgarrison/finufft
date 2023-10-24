@@ -126,14 +126,14 @@ int cuspread1d_nuptsdriven_prop(int nf1, int M, cufinufft_plan_t<T> *d_plan) {
 
         int pirange = d_plan->spopts.pirange;
 
-        checkCudaErrors(cudaMemsetAsync(d_binsize, 0, numbins * sizeof(int)));
+        checkCudaErrors(cudaMemsetAsync(d_binsize, 0, numbins * sizeof(int), stream));
         calc_bin_size_noghost_1d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(M, nf1, bin_size_x, numbins, d_binsize,
                                                                              d_kx, d_sortidx, pirange);
 
         int n = numbins;
         thrust::device_ptr<int> d_ptr(d_binsize);
         thrust::device_ptr<int> d_result(d_binstartpts);
-        thrust::exclusive_scan(d_ptr, d_ptr + n, d_result);
+        thrust::exclusive_scan(thrust::cuda::par.on(stream), d_ptr, d_ptr + n, d_result);
 
         calc_inverse_of_global_sort_idx_1d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(
             M, bin_size_x, numbins, d_binstartpts, d_sortidx, d_kx, d_idxnupts, pirange, nf1);
@@ -222,7 +222,7 @@ int cuspread1d_subprob_prop(int nf1, int M, cufinufft_plan_t<T> *d_plan)
     int n = numbins;
     thrust::device_ptr<int> d_ptr(d_binsize);
     thrust::device_ptr<int> d_result(d_binstartpts);
-    thrust::exclusive_scan(d_ptr, d_ptr + n, d_result);
+    thrust::exclusive_scan(thrust::cuda::par.on(stream), d_ptr, d_ptr + n, d_result);
 
     calc_inverse_of_global_sort_idx_1d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(
         M, bin_size_x, numbins, d_binstartpts, d_sortidx, d_kx, d_idxnupts, pirange, nf1);
@@ -231,7 +231,7 @@ int cuspread1d_subprob_prop(int nf1, int M, cufinufft_plan_t<T> *d_plan)
 
     d_ptr = thrust::device_pointer_cast(d_numsubprob);
     d_result = thrust::device_pointer_cast(d_subprobstartpts + 1);
-    thrust::inclusive_scan(d_ptr, d_ptr + n, d_result);
+    thrust::inclusive_scan(thrust::cuda::par.on(stream), d_ptr, d_ptr + n, d_result);
     checkCudaErrors(cudaMemsetAsync(d_subprobstartpts, 0, sizeof(int), stream));
 
     int totalnumsubprob;
