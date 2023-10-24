@@ -237,6 +237,8 @@ int cufinufft_makeplan_impl(int type, int dim, int *nmodes, int iflag, int ntran
     // Multi-GPU support: reset the device ID
     cudaSetDevice(orig_gpu_device_id);
 
+    cudaStreamSynchronize(stream);
+
     return ier;
 }
 
