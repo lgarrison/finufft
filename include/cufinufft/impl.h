@@ -172,7 +172,6 @@ int cufinufft_makeplan_impl(int type, int dim, int *nmodes, int iflag, int ntran
     if (d_plan->type == 2)
         d_plan->spopts.spread_direction = 2;
 
-    cufftSetStream(d_plan->fftplan, d_plan->stream);
     switch (d_plan->dim) {
     case 1: {
         int n[] = {(int)nf1};
@@ -196,6 +195,7 @@ int cufinufft_makeplan_impl(int type, int dim, int *nmodes, int iflag, int ntran
                       inembed[0] * inembed[1] * inembed[2], cufft_type<T>(), maxbatchsize);
     } break;
     }
+    cufftSetStream(d_plan->fftplan, d_plan->stream);
 
     using namespace cufinufft::memtransfer;
     switch (d_plan->dim) {
@@ -230,13 +230,13 @@ int cufinufft_makeplan_impl(int type, int dim, int *nmodes, int iflag, int ntran
     checkCudaErrors(cudaMemcpyAsync(d_f, f, dim * MAX_NQUAD * sizeof(T), cudaMemcpyHostToDevice, stream));
     ier = cufserieskernelcompute(d_plan->dim, nf1, nf2, nf3, d_f, d_a, d_plan->fwkerhalf1, d_plan->fwkerhalf2,
                                  d_plan->fwkerhalf3, d_plan->spopts.nspread, stream);
-
     cudaFreeAsync(d_a, stream);
     cudaFreeAsync(d_f, stream);
 
     // Multi-GPU support: reset the device ID
     cudaSetDevice(orig_gpu_device_id);
 
+    // Wait for async copies out of stack buffers
     cudaStreamSynchronize(stream);
 
     return ier;
