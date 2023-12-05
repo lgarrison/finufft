@@ -89,7 +89,7 @@ int cuspread3d_nuptsdriven_prop(int nf1, int nf2, int nf3, int M, cufinufft_plan
         if ((ier = checkCudaErrors(
                  cudaMemsetAsync(d_binsize, 0, numbins[0] * numbins[1] * numbins[2] * sizeof(int), stream))))
             return ier;
-        calc_bin_size_noghost_3d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(
+        calc_bin_size_noghost_3d<<<(M + 512 - 1) / 512, 512, 0, stream>>>(
             M, nf1, nf2, nf3, bin_size_x, bin_size_y, bin_size_z, numbins[0], numbins[1], numbins[2], d_binsize, d_kx,
             d_ky, d_kz, d_sortidx, pirange);
         RETURN_IF_CUDA_ERROR
@@ -99,7 +99,7 @@ int cuspread3d_nuptsdriven_prop(int nf1, int nf2, int nf3, int M, cufinufft_plan
         thrust::device_ptr<int> d_result(d_binstartpts);
         thrust::exclusive_scan(thrust::cuda::par.on(stream), d_ptr, d_ptr + n, d_result);
 
-        calc_inverse_of_global_sort_index_3d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(
+        calc_inverse_of_global_sort_index_3d<<<(M + 512 - 1) / 512, 512, 0, stream>>>(
             M, bin_size_x, bin_size_y, bin_size_z, numbins[0], numbins[1], numbins[2], d_binstartpts, d_sortidx, d_kx,
             d_ky, d_kz, d_idxnupts, pirange, nf1, nf2, nf3);
         RETURN_IF_CUDA_ERROR
@@ -433,7 +433,7 @@ int cuspread3d_subprob_prop(int nf1, int nf2, int nf3, int M, cufinufft_plan_t<T
     if ((ier = checkCudaErrors(
              cudaMemsetAsync(d_binsize, 0, numbins[0] * numbins[1] * numbins[2] * sizeof(int), stream))))
         return ier;
-    calc_bin_size_noghost_3d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(
+    calc_bin_size_noghost_3d<<<(M + 512 - 1) / 512, 512, 0, stream>>>(
         M, nf1, nf2, nf3, bin_size_x, bin_size_y, bin_size_z, numbins[0], numbins[1], numbins[2], d_binsize, d_kx, d_ky,
         d_kz, d_sortidx, pirange);
     RETURN_IF_CUDA_ERROR
@@ -443,7 +443,7 @@ int cuspread3d_subprob_prop(int nf1, int nf2, int nf3, int M, cufinufft_plan_t<T
     thrust::device_ptr<int> d_result(d_binstartpts);
     thrust::exclusive_scan(thrust::cuda::par.on(stream), d_ptr, d_ptr + n, d_result);
 
-    calc_inverse_of_global_sort_index_3d<<<(M + 1024 - 1) / 1024, 1024, 0, stream>>>(
+    calc_inverse_of_global_sort_index_3d<<<(M + 512 - 1) / 512, 512, 0, stream>>>(
         M, bin_size_x, bin_size_y, bin_size_z, numbins[0], numbins[1], numbins[2], d_binstartpts, d_sortidx, d_kx, d_ky,
         d_kz, d_idxnupts, pirange, nf1, nf2, nf3);
     RETURN_IF_CUDA_ERROR
